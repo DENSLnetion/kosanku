@@ -5,26 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistem Manajemen Kosan</title>
     
-    <!-- ICONS & MANIFEST (Taruh file gambar di folder /public) -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <!-- ICONS & MANIFEST (Auto-generated pakai SVG Emoji, ga butuh file fisik!) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
     <link rel="manifest" href="/manifest.json">
 
     <!-- EXTERNAL LIBRARIES -->
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script src="[https://cdn.jsdelivr.net/npm/chart.js](https://cdn.jsdelivr.net/npm/chart.js)"></script>
-    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CSS (Narik dari folder src) -->
     <link rel="stylesheet" href="/src/style.css">
 </head>
 <body class="text-slate-800 antialiased h-screen flex flex-col relative">
 
-    <!-- 
-      Logika gw: HTML shell panjang lu kemaren bakal gw pecah jadi komponen di JS (Tarikan 2 & 3). 
-      Jadi file ini bersih, cuma sebagai kontainer utama. 
-      JS bakal nge-render dan ngatur state ke dalam div #app ini. 
-    -->
     <div id="app" class="flex-1 flex flex-col h-full relative overflow-hidden">
         <!-- Konten UI bakal di-inject via src/main.js -->
     </div>
@@ -33,3 +28,4 @@
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>
+
