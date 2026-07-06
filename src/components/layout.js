@@ -1,6 +1,3 @@
-// src/components/layout.js
-// Menangani kerangka utama UI (Header, Main, Navigasi Bawah, Bottom Sheets)
-
 export function getBaseLayoutTemplate() {
     return `
         <!-- ==================== HEADER ==================== -->
