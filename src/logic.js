@@ -1324,7 +1324,7 @@ export function mountAppLogic() {
                 if (historySelectMode) {
                     window.toggleHistorySelect(el.dataset.id);
                 } else {
-                    window.openReceiptSheet(el.dataset.id);
+                    window.openPaymentDetail('', el.dataset.id); // Kita pass kosong untuk roomId biar auto cari
                 }
             });
         });
@@ -1673,33 +1673,99 @@ export function mountAppLogic() {
         a.click(); 
     };
 
-    // --- RECEIPT & KUITANSI (TEMPAT LU COPAS LOGIC ASLI LU) ---
+    // --- RECEIPT & KUITANSI BIKINAN BARU (LANGSUNG TANCEP) ---
     window.openReceiptSheet = (transId) => {
-        // [Taruh Logic Kuitansi HTML Injection Asli lu di sini]
-        alert("Buka Kuitansi untuk ID: " + transId); 
+        let t = state.transactions.find(x => x.id === transId);
+        if (!t) return alert("Data transaksi tidak ditemukan!");
+
+        let room = t.roomId ? state.rooms.find(x => x.id === t.roomId) : null;
+        let c = document.getElementById('sheet-receipt-content');
+        if (!c) return;
+
+        let isIn = t.type === 'in';
+
+        let html = `
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-2">
+                <div class="text-center mb-6 border-b border-dashed border-slate-300 pb-5">
+                    <div class="w-12 h-12 ${isIn ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'} rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${isIn ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'}"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800">Kuitansi Transaksi</h2>
+                    <p class="text-xs text-slate-500 mt-1">${state.kosanName || 'KosanKu'}</p>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between"><span class="text-slate-500">ID</span><span class="font-mono font-bold">${t.id.toUpperCase()}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Tanggal</span><span class="font-semibold">${fmtTglSingkat(t.date)}</span></div>
+                    ${room ? `<div class="flex justify-between"><span class="text-slate-500">Penghuni</span><span class="font-semibold text-slate-800">Kmr ${room.number} (${room.tenantName})</span></div>` : ''}
+                    <div class="flex justify-between"><span class="text-slate-500">Kategori</span><span class="font-semibold">${t.category}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Metode</span><span class="font-semibold">${t.method}</span></div>
+                    
+                    <div class="pt-4 mt-2 border-t border-slate-100">
+                        <span class="block text-slate-500 mb-1 text-xs uppercase tracking-wider">Keterangan</span>
+                        <p class="font-medium text-slate-800 leading-snug">${t.desc || '-'}</p>
+                    </div>
+                </div>
+                <div class="mt-6 bg-slate-50 p-4 rounded-xl flex justify-between items-center border border-slate-100">
+                    <span class="font-bold text-slate-600">Total</span>
+                    <span class="text-xl font-extrabold ${isIn ? 'text-[#107c41]' : 'text-red-600'}">${isIn ? '+' : '-'}${formatRp(t.amount)}</span>
+                </div>
+            </div>
+            
+            <div class="mt-5 flex gap-3">
+                <button onclick="window.shareReceipt('${t.id}')" class="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-95">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.101.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-5.824 4.737-10.56 10.561-10.56 2.82 0 5.47 1.098 7.463 3.091 1.993 1.992 3.091 4.643 3.091 7.464-.001 5.823-4.737 10.559-10.561 10.559z"/></svg>
+                    Kirim WA
+                </button>
+                <button onclick="window.closeAllSheets()" class="w-14 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl flex items-center justify-center transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        `;
+        
+        c.innerHTML = html;
+        window.openSheet('sheet-receipt');
+    };
+
+    window.shareReceipt = (transId) => {
+        let t = state.transactions.find(x => x.id === transId);
+        if (!t) return;
+        let room = t.roomId ? state.rooms.find(x => x.id === t.roomId) : null;
+        
+        let text = `*KUITANSI PEMBAYARAN*\n${state.kosanName || 'KosanKu'}\n\n`;
+        text += `ID Transaksi: ${t.id.toUpperCase()}\n`;
+        text += `Tanggal: ${fmtTglSingkat(t.date)}\n`;
+        if (room) text += `Kamar: ${room.number} (${room.tenantName})\n`;
+        text += `Kategori: ${t.category}\n`;
+        text += `Metode: ${t.method}\n\n`;
+        text += `*Keterangan:*\n${t.desc || '-'}\n\n`;
+        text += `*TOTAL ${t.type === 'in' ? 'BAYAR' : 'KELUAR'}:*\n*${formatRp(t.amount)}*\n\n`;
+        text += `_Terima kasih._`;
+        
+        let url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
     };
 
     window.openPaymentDetail = (roomId, transId) => {
-        // [Taruh Logic Kuitansi HTML Injection Asli lu di sini]
-        alert("Buka Detail Payment: " + transId);
+        // Karena sistem modal diubah, klik item di riwayat langsung buka receipt yang lebih keren!
+        window.openReceiptSheet(transId);
     };
 
-    window.closePaymentDetail = () => {
-        let modal = document.getElementById('modal-payment');
-        let card = document.getElementById('modal-payment-card');
-        if (modal) {
-            modal.classList.add('opacity-0'); 
-            card.classList.add('scale-95');
-            setTimeout(() => { 
-                modal.classList.remove('flex'); 
-                modal.classList.add('hidden'); 
-            }, 200);
-        }
+    window.openPriceChangeSheet = () => {
+        let el = document.getElementById('sheet-price-change-content');
+        if (!el) return;
+        el.innerHTML = `
+            <div class="py-8 text-center text-slate-500 flex flex-col items-center">
+                <svg class="w-12 h-12 text-blue-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <h3 class="font-bold text-slate-800 text-lg mb-1">Fitur Segera Hadir</h3>
+                <p class="text-sm">Logika ubah harga lagi dipindahin ke modular. Tunggu bentar ya bang!</p>
+            </div>
+        `;
+        window.openSheet('sheet-price-change');
     };
-    
-    window.shareReceipt = (transId) => {
-        // [Taruh Logic Share WA Asli lu di sini]
-    }
+
+    window.openOnboardingEdit = () => {
+        alert("Fitur Edit Setup Kosan akan masuk di minor update berikutnya! (Mode Modular)");
+    };
 }
-
-
