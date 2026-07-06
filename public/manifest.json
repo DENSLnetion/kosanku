@@ -1,9 +1,0 @@
-{
-  "name": "Sistem Manajemen Kosan",
-  "short_name": "KosanKu",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#e3e8ed",
-  "theme_color": "#005fb8"
-}
-
